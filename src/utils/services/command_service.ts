@@ -1,16 +1,14 @@
-import { Services } from "../enums/services";
+import path from "path";
 import { CommandType } from "../types/command_type";
-import { LoggerService } from "./logger_service";
+import { logger } from "./logger_service";
 
 export class CommandService {
   private appId: string;
   private botToken: string;
-  private logger: LoggerService;
 
-  constructor(appId: string, botToken: string, logger: LoggerService) {
+  constructor(appId: string, botToken: string) {
     this.appId = appId;
     this.botToken = botToken;
-    this.logger = logger;
   }
 
   public async initGlobalCommands(commands: CommandType[]): Promise<void> {
@@ -26,17 +24,14 @@ export class CommandService {
     });
 
     if (!res.ok) {
-      const data = await res.json();
-      this.logger.error(
-        `Failed to initialize global commands: ${res.statusText} - ${data.message}`,
-        Services.COMMAND_SERVICE
+      const error = await res.json();
+      logger.error(
+        "Failed to initialize global commands:",
+        new Error(`${res.statusText} ${error.message}`)
       );
       return;
     }
 
-    this.logger.info(
-      "Global Commands initialized successfully",
-      Services.COMMAND_SERVICE
-    );
+    logger.info("Global Commands initialized successfully");
   }
 }

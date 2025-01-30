@@ -10,12 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommandService = void 0;
-const services_1 = require("../enums/services");
+const logger_service_1 = require("./logger_service");
 class CommandService {
-    constructor(appId, botToken, logger) {
+    constructor(appId, botToken) {
         this.appId = appId;
         this.botToken = botToken;
-        this.logger = logger;
     }
     initGlobalCommands(commands) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,11 +29,11 @@ class CommandService {
                 body: JSON.stringify(commands),
             });
             if (!res.ok) {
-                const data = yield res.json();
-                this.logger.error(`Failed to initialize global commands: ${res.statusText} - ${data.message}`, services_1.Services.COMMAND_SERVICE);
+                const error = yield res.json();
+                logger_service_1.logger.error("Failed to initialize global commands:", new Error(`${res.statusText} ${error.message}`));
                 return;
             }
-            this.logger.info("Global Commands initialized successfully", services_1.Services.COMMAND_SERVICE);
+            logger_service_1.logger.info("Global Commands initialized successfully");
         });
     }
 }

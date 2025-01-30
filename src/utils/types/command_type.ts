@@ -5,4 +5,6 @@ export interface CommandType {
   options?: any;
   choices?: any;
   required?: boolean;
+  integration_types?: number[];
+  contexts?: number[];
 }
