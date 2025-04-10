@@ -4,8 +4,10 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/Yobubble/yona-bot/cmd"
+	"github.com/Yobubble/yona-bot/api"
 	"github.com/Yobubble/yona-bot/config"
+	"github.com/Yobubble/yona-bot/internal/log"
+	discordcmd "github.com/Yobubble/yona-bot/pkg/discord_cmd"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -15,16 +17,17 @@ var (
 )
 
 func init() {
-	c := config.InitConfig()
-	config.InitLogger()
+	config.InitConfig()
+	log.InitLogger()
+	api.InitVoicevoxEngineApi(config.C)
 
-	s, err = discordgo.New("Bot " + c.GetDiscordBotToken())
+	s, err = discordgo.New("Bot " + config.C.GetDiscordBotToken())
 	if err != nil {
-		config.Sugar.Fatalf("Invalid Bot Parameter: %v", err)
+		log.Sugar.Fatalf("Invalid Bot Parameter: %v", err)
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := cmd.CommandHandlers[i.ApplicationCommandData().Name]; ok {
+		if h, ok := discordcmd.CommandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
 		}
 	})
@@ -33,22 +36,22 @@ func init() {
 // Ref: https://github.com/bwmarrin/discordgo/blob/master/examples/slash_commands/main.go
 func main() {
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		config.Sugar.Infof("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
+		log.Sugar.Infof("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 
 	err = s.Open()
 	if err != nil {
-		config.Sugar.Fatalf("Cannot open the session: %v", err)
+		log.Sugar.Fatalf("Cannot open the session: %v", err)
 	}
 
-	config.Sugar.Info("Adding commands...")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(cmd.Commands))
+	log.Sugar.Info("Adding commands...")
 
 	// Create Global Command
-	for i, v := range cmd.Commands {
+	registeredCommands := make([]*discordgo.ApplicationCommand, len(discordcmd.Commands))
+	for i, v := range discordcmd.Commands {
 		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
 		if err != nil {
-			config.Sugar.Panicf("Cannot create '%v' command: %v", v.Name, err)
+			log.Sugar.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
 		registeredCommands[i] = cmd
 	}
@@ -57,11 +60,15 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
-	config.Sugar.Info("Press Ctrl+C to exit")
+	log.Sugar.Info("Press Ctrl+C to exit")
 	<-stop
 
-	// NOTE: remove all the global commands
+	// NOTE: remove all the global commands - TODO: change to script
 	// removeGlobalCommands()
 
-	config.Sugar.Info("Gracefully shutting down.")
+	err := api.Vve.CloseVoicevox()
+	if err != nil {
+		log.Sugar.Errorf("Cannot close Voicevox: %v", err)
+	}
+	log.Sugar.Info("Gracefully shutting down.")
 }
