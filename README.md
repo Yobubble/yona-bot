@@ -1,4 +1,7 @@
 # yona-bot
 
 ## Features
-- Voicevox Talk (in progress)
+- Voicevox Talk
+
+## Issues encountered
+- Poor real-time conversation performance
