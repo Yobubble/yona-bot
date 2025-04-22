@@ -20,7 +20,7 @@ func (v *vve) audioQuery(text string, speakerId int) ([]byte, error) {
 	url := fmt.Sprintf(v.baseUrl+"/audio_query?text=%s&speaker=%d", url.QueryEscape(text), speakerId)
 	res, err := http.Post(url, "application/json", nil)
 	if err != nil {
-		log.Sugar.Warn("Error get audio query from preset")
+		log.Sugar.Warn("Error get audio query")
 		return nil, err
 	}
 	defer res.Body.Close()

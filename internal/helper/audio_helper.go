@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 )
@@ -16,30 +15,30 @@ func (a *AudioHelper) ConvertToDCA(inputPath string, outputPath string) error {
 
 	pipe, err := cmdFFmpeg.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("failed to create pipe: %v", err)
+		return err
 	}
 	cmdDCA.Stdin = pipe
 
 	output, err := os.Create(outputPath)
 	if err != nil {
-		return fmt.Errorf("failed to create output file: %v", err)
+		return err
 	}
 	defer output.Close()
 
 	cmdDCA.Stdout = output
 
 	if err := cmdFFmpeg.Start(); err != nil {
-		return fmt.Errorf("failed to start ffmpeg: %v", err)
+		return err
 	}
 	if err := cmdDCA.Start(); err != nil {
-		return fmt.Errorf("failed to start dca: %v", err)
+		return err
 	}
 
 	if err := cmdFFmpeg.Wait(); err != nil {
-		return fmt.Errorf("ffmpeg error: %v", err)
+		return err
 	}
 	if err := cmdDCA.Wait(); err != nil {
-		return fmt.Errorf("dca error: %v", err)
+		return err
 	}
 
 	return nil

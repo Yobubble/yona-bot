@@ -26,7 +26,7 @@ func (v *vvtController) AudioTest() {
 			Content: "Playing Lilac by Mrs. GREEN APPLE 🎵",
 		}})
 
-	if err := v.dh.PlayAudio(v.dh.GetVoiceConnection(), enum.Audio.GetFullPath("Mrs._GREEN_APPLE_Lilac")); err != nil {
+	if err := v.dh.PlayAudio(v.dh.GetVoiceConnection(), "./assets/audios/Mrs._GREEN_APPLE_Lilac.dca"); err != nil {
 		log.Sugar.Errorf("Error playing audio: %v", err)
 		return
 	}

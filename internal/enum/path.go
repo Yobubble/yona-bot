@@ -13,7 +13,7 @@ const (
 	SSRC_OGG    Path = "./assets/audios/ssrcs_ogg/"
 	SSRC_MP3    Path = "./assets/audios/ssrcs_mp3/"
 	VVE         Path = "./assets/audios/vves/"
-	Audio       Path = "./assets/audios/audios/"
+	Audio       Path = "./assets/audios/dcas/"
 )
 
 func (p Path) GetFullPath(fileName string) string {
@@ -30,7 +30,7 @@ func (p Path) GetFullPath(fileName string) string {
 	case Audio:
 		return fmt.Sprintf(base, p, fileName, Audio.GetFormat())
 	default:
-		log.Sugar.Panic("Invalid Path")
+		log.Sugar.Panic("Invalid Full Path")
 		return ""
 	}
 }

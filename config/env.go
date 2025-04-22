@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 
 	"github.com/Yobubble/yona-bot/internal/enum"
@@ -52,7 +53,7 @@ func parsedLLM(llm string) enum.LLM {
 	case "GPT4o":
 		return enum.GPT4o
 	default:
-		log.Sugar.Panic("Invalid LLM Model")
+		log.Sugar.Panic("Invalid LM")
 		return ""
 	}
 }
@@ -87,9 +88,12 @@ func (c *Cfg) GetVVEBaseUrl() string {
 
 func LoadConfig() *Cfg {
 	err := godotenv.Load()
-
 	if err != nil {
-		log.Sugar.Panicf("Error loading .env file: %v\n", err)
+		if errors.Is(err, os.ErrNotExist) {
+			log.Sugar.Info("No .env file found, rely on system environment variable.")
+		} else {
+			log.Sugar.Panicf("Error loading .env file: %v\n", err)
+		}
 	}
 
 	storage := parsedStorage(os.Getenv("STORAGE"))
@@ -119,7 +123,7 @@ func LoadConfig() *Cfg {
 			vveBaseUrl:   os.Getenv("VOICEVOX_ENGINE_BASE_URL"),
 		}
 	default:
-		log.Sugar.Panic("Invalid Config")
+		log.Sugar.Panic("Invalid Environment Variable")
 		return nil
 	}
 }

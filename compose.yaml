@@ -1,0 +1,19 @@
+services:
+  vve:
+    image: voicevox/voicevox_engine:cpu-latest
+    networks:
+    - yona_network
+
+  yona:
+    build:
+      context: .
+    image: yona_i
+    env_file:
+    - path: .env
+      required: true
+    networks:
+      - yona_network
+  
+networks:
+  yona_network:
+    driver: bridge

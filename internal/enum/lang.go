@@ -1,5 +1,7 @@
 package enum
 
+import "github.com/Yobubble/yona-bot/internal/log"
+
 type Lang string
 
 const (
@@ -11,6 +13,7 @@ func (l Lang) OpenAI() string {
 	case JP:
 		return "ja"
 	default:
+		log.Sugar.Panic("Invalid Language")
 		return ""
 	}
 }
