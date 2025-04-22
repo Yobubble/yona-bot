@@ -12,9 +12,9 @@
 - Leverage docker compose for easy local running.
 
 ## Issues encountered
-- Poor real-time conversation performance.
+- Poor performance.
 
 
-NOTE
-- you can just terminate the bot to reveal the recorded files
+### Some Notes
+- you can just terminate the bot directly in the terminal to reveal the recorded files or use ```/disconnect``` to remove the recorded files
 
