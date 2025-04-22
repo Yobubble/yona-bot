@@ -11,32 +11,50 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func RemoveGlobalCommands(s *discordgo.Session) error {
-	log.Sugar.Debug("Removing Global commands...")
+type DiscordHelper struct {
+	S *discordgo.Session
+	I *discordgo.InteractionCreate
+}
 
-	cmds, err := s.ApplicationCommands(s.State.User.ID, "")
+func (d *DiscordHelper) RemoveGlobalCommands() error {
+	cmds, err := d.S.ApplicationCommands(d.S.State.User.ID, "")
 	if err != nil {
 		log.Sugar.Error("Could not fetch registered commands")
 		return err
 	}
 
 	for _, v := range cmds {
-		err := s.ApplicationCommandDelete(s.State.User.ID, "", v.ID)
+		err := d.S.ApplicationCommandDelete(d.S.State.User.ID, "", v.ID)
 		if err != nil {
 			log.Sugar.Errorf("Cannot delete '%v' command: %v", v.Name, err)
 			return err
 		}
 	}
 
+	log.Sugar.Debug("Successfully removed global commands...")
 	return nil
 }
 
-func IsInVoiceChannel(s *discordgo.Session, i *discordgo.InteractionCreate) bool {
-	return s.VoiceConnections[i.GuildID] != nil
+func (d *DiscordHelper) GetGuildName() (string, error) {
+	guild, err := d.S.Guild(d.I.GuildID)
+	if err != nil {
+		log.Sugar.Errorf("Failed to get guild name: %v", err)
+		return "", err
+	}
+
+	return guild.Name, nil
 }
 
-func GetUserVoiceChannel(s *discordgo.Session, i *discordgo.InteractionCreate) (string, error) {
-	vs, err := s.State.VoiceState(i.GuildID, i.Member.User.ID)
+func (d *DiscordHelper) IsBotInVoiceChannel() bool {
+	return d.S.VoiceConnections[d.I.GuildID] != nil
+}
+
+func (d *DiscordHelper) GetVoiceConnection() *discordgo.VoiceConnection {
+	return d.S.VoiceConnections[d.I.GuildID]
+}
+
+func (d *DiscordHelper) GetUserVoiceChannel() (string, error) {
+	vs, err := d.S.State.VoiceState(d.I.GuildID, d.I.Member.User.ID)
 	if err != nil {
 		log.Sugar.Errorf("Failed to get voice state: %v", err)
 		return "", err
@@ -45,8 +63,8 @@ func GetUserVoiceChannel(s *discordgo.Session, i *discordgo.InteractionCreate) (
 	return vs.ChannelID, nil
 }
 
-func PlayAudio(vc *discordgo.VoiceConnection, filePath string) error {
-	buffer, err := loadSound(filePath)
+func (d *DiscordHelper) PlayAudio(vc *discordgo.VoiceConnection, filePath string) error {
+	buffer, err := d.loadSound(filePath)
 	if err != nil {
 		return err
 	}
@@ -66,7 +84,7 @@ func PlayAudio(vc *discordgo.VoiceConnection, filePath string) error {
 	return nil
 }
 
-func loadSound(filePath string) ([][]byte, error) {
+func (d *DiscordHelper) loadSound(filePath string) ([][]byte, error) {
 	var buffer = make([][]byte, 0)
 
 	file, err := os.Open(filePath)
@@ -107,5 +125,12 @@ func loadSound(filePath string) ([][]byte, error) {
 
 		// Append encoded pcm data to the buffer.
 		buffer = append(buffer, InBuf)
+	}
+}
+
+func NewDiscordHelper(s *discordgo.Session, i *discordgo.InteractionCreate) *DiscordHelper {
+	return &DiscordHelper{
+		S: s,
+		I: i,
 	}
 }

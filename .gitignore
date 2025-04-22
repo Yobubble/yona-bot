@@ -1,6 +1,6 @@
-*.env
+**/.env
+**/.DS_Store
 /node/node_modules
 /node/dist
-**/.DS_Store
-/go/config/config.yaml
-/go/todos.md
+/go/assets/chat_histories/
+/go/vve_data/

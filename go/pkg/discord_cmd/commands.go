@@ -28,7 +28,7 @@ var Commands = []*discordgo.ApplicationCommand{
 				Type:        discordgo.ApplicationCommandOptionSubCommand,
 			},
 			{
-				Name:        "mrs_green_apple_lilac",
+				Name:        "audio_test",
 				Description: "Play Lilac by Mrs. GREEN APPLE for the audio testing purpose.",
 				Type:        discordgo.ApplicationCommandOptionSubCommand,
 			},

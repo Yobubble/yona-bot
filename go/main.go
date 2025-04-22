@@ -4,10 +4,14 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/Yobubble/yona-bot/api"
 	"github.com/Yobubble/yona-bot/config"
+	"github.com/Yobubble/yona-bot/internal/helper"
 	"github.com/Yobubble/yona-bot/internal/log"
 	discordcmd "github.com/Yobubble/yona-bot/pkg/discord_cmd"
+	"github.com/Yobubble/yona-bot/pkg/lm"
+	"github.com/Yobubble/yona-bot/pkg/storage"
+	"github.com/Yobubble/yona-bot/pkg/stt"
+	"github.com/Yobubble/yona-bot/pkg/tts"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -17,18 +21,30 @@ var (
 )
 
 func init() {
-	config.InitConfig()
 	log.InitLogger()
-	api.InitVoicevoxEngineApi(config.C)
+	cfg := config.LoadConfig()
 
-	s, err = discordgo.New("Bot " + config.C.GetDiscordBotToken())
+	st := storage.SelectStorage(cfg)
+	tts := tts.SelectTTSModel(cfg)
+	stt := stt.NewOpenAI(cfg)
+	lm := lm.SelectLM(cfg, st)
+
+	deps := &discordcmd.DepsHolder{
+		ST:  st,
+		LM:  lm,
+		TTS: tts,
+		STT: stt,
+	}
+
+	s, err = discordgo.New("Bot " + cfg.GetDiscordBotToken())
 	if err != nil {
 		log.Sugar.Fatalf("Invalid Bot Parameter: %v", err)
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		dh := helper.NewDiscordHelper(s, i)
 		if h, ok := discordcmd.CommandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
+			h(dh, deps)
 		}
 	})
 }
@@ -46,7 +62,7 @@ func main() {
 
 	log.Sugar.Info("Adding commands...")
 
-	// Create Global Command
+	// Create Global Commands
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(discordcmd.Commands))
 	for i, v := range discordcmd.Commands {
 		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
@@ -63,12 +79,5 @@ func main() {
 	log.Sugar.Info("Press Ctrl+C to exit")
 	<-stop
 
-	// NOTE: remove all the global commands - TODO: change to script
-	// removeGlobalCommands()
-
-	err := api.Vve.CloseVoicevox()
-	if err != nil {
-		log.Sugar.Errorf("Cannot close Voicevox: %v", err)
-	}
 	log.Sugar.Info("Gracefully shutting down.")
 }

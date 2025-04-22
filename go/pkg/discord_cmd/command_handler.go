@@ -1,45 +1,36 @@
 package discordcmd
 
 import (
-	"time"
-
-	"github.com/Yobubble/yona-bot/internal/log"
-	voicevoxTalk "github.com/Yobubble/yona-bot/pkg/voicevox_talk"
+	"github.com/Yobubble/yona-bot/internal/helper"
+	vvt "github.com/Yobubble/yona-bot/pkg/voicevox_talk"
 	"github.com/bwmarrin/discordgo"
 )
 
-var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+var CommandHandlers = map[string]func(dh *helper.DiscordHelper, deps *DepsHolder){
 
-	"hello": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	"hello": func(dh *helper.DiscordHelper, deps *DepsHolder) {
+		dh.S.InteractionRespond(dh.I.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Content: "Hello this is Yona bot! 🩵",
 			},
 		})
 	},
-	"voicevox_talk": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		options := i.ApplicationCommandData().Options
-		vvt := &voicevoxTalk.VoicevoxTalk{
-			S: s,
-			I: i,
-			VVTUseCase: &voicevoxTalk.VVTUseCases{
-				Vc: s.VoiceConnections[i.GuildID],
-			},
-		}
+	"voicevox_talk": func(dh *helper.DiscordHelper, deps *DepsHolder) {
+		options := dh.I.ApplicationCommandData().Options
+
+		vvtu := vvt.NewVVTUseCase(deps.ST, deps.LM, deps.TTS, deps.STT, deps.AH)
+		vvtc := vvt.NewVVTController(vvtu, dh)
 
 		switch options[0].Name {
 		case "join":
-			vvt.JoinVoiceChannel()
+			vvtc.JoinVoiceChannel()
 		case "listen":
-			start := time.Now()
-			vvt.ListenToTheVoiceChannel()
-			end := time.Now()
-			log.Sugar.Debugf("Take %s seconds", end.Sub(start))
-		case "mrs_green_apple_lilac":
-			vvt.AudioTest()
+			vvtc.ListenToTheVoiceChannel()
+		case "audio_test":
+			vvtc.AudioTest()
 		case "disconnect":
-			vvt.DisconnectFromTheVoiceChannel()
+			vvtc.DisconnectFromTheVoiceChannel()
 		}
 	},
 }
