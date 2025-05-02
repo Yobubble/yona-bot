@@ -14,7 +14,7 @@ type Cfg struct {
 	storage         enum.Storage
 	s3              S3Config
 	lang            enum.Lang
-	lm              enum.LLM
+	lm              enum.LM
 	openAIApiKey    string
 	vveBaseUrl      string
 }
@@ -48,8 +48,8 @@ func parsedLang(lang string) enum.Lang {
 	}
 }
 
-func parsedLLM(llm string) enum.LLM {
-	switch llm {
+func parsedLM(lm string) enum.LM {
+	switch lm {
 	case "GPT4o":
 		return enum.GPT4o
 	default:
@@ -74,7 +74,7 @@ func (c *Cfg) GetLang() enum.Lang {
 	return c.lang
 }
 
-func (c *Cfg) GetLM() enum.LLM {
+func (c *Cfg) GetLM() enum.LM {
 	return c.lm
 }
 
@@ -103,7 +103,7 @@ func LoadConfig() *Cfg {
 			discordBotToken: os.Getenv("DISCORD_BOT_TOKEN"),
 			storage:         parsedStorage(os.Getenv("STORAGE")),
 			lang:            parsedLang(os.Getenv("LANGUAGE")),
-			lm:              parsedLLM(os.Getenv("LM")),
+			lm:              parsedLM(os.Getenv("LM")),
 			openAIApiKey:    os.Getenv("OPENAI_API_KEY"),
 			vveBaseUrl:      os.Getenv("VOICEVOX_ENGINE_BASE_URL"),
 		}
@@ -118,7 +118,7 @@ func LoadConfig() *Cfg {
 				AWSRegion:          os.Getenv("AWS_REGION"),
 			},
 			lang:         parsedLang(os.Getenv("LANGUAGE")),
-			lm:           parsedLLM(os.Getenv("LM")),
+			lm:           parsedLM(os.Getenv("LM")),
 			openAIApiKey: os.Getenv("OPENAI_API_KEY"),
 			vveBaseUrl:   os.Getenv("VOICEVOX_ENGINE_BASE_URL"),
 		}
