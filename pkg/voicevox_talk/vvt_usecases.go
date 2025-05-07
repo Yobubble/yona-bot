@@ -1,6 +1,7 @@
 package vvt
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -69,6 +70,9 @@ func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, er
 			log.Sugar.Info("Silence detected...")
 
 			log.Sugar.Debugf("There %d user(s) in the voice channel", len(files))
+			if len(files) == 0 {
+				return nil, errors.New("no user in the voice channel")
+			}
 
 			ssrcs := make([]uint32, 0, len(files))
 			for ssrc, file := range files {

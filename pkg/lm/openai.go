@@ -7,6 +7,8 @@ import (
 
 	"github.com/Yobubble/yona-bot/config"
 	"github.com/Yobubble/yona-bot/internal/enum"
+	"github.com/Yobubble/yona-bot/internal/helper"
+	"github.com/Yobubble/yona-bot/internal/log"
 	"github.com/Yobubble/yona-bot/pkg/storage"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -17,6 +19,7 @@ type openAI struct {
 	conversationHistory []openai.ChatCompletionMessageParamUnion
 	st                  storage.Storage
 	model               enum.LM
+	lh                  *helper.LangHelper
 }
 
 func (g *openAI) NewChatHistory(guildName string) error {
@@ -46,6 +49,11 @@ func (g *openAI) UpdateChatHistory(guildName string, question string, answer str
 }
 
 func (g *openAI) AskQuestion(guildName string, question string) (string, error) {
+	if err := g.lh.CheckLang(question); err != nil {
+		log.Sugar.Error("Language not supported")
+		return "", err
+	}
+
 	cli := openai.NewClient(option.WithAPIKey(g.cfg.GetOpenAIAPIKey()))
 
 	err := g.LoadChatHistory(guildName)
@@ -54,7 +62,7 @@ func (g *openAI) AskQuestion(guildName string, question string) (string, error) 
 	}
 
 	param := openai.ChatCompletionNewParams{
-		Messages: append(g.conversationHistory, openai.UserMessage(question)),
+		Messages: append(g.conversationHistory, openai.SystemMessage("Always repeat the question."), openai.UserMessage(question)),
 		Seed:     openai.Int(1),
 		Model:    g.model.GetOpenAIModel(),
 	}
@@ -89,10 +97,11 @@ func (g *openAI) LoadChatHistory(guildName string) error {
 	return nil
 }
 
-func newOpenAI(cfg *config.Cfg, st storage.Storage, model enum.LM) LM {
+func newOpenAI(cfg *config.Cfg, st storage.Storage, lh *helper.LangHelper, model enum.LM) LM {
 	return &openAI{
 		cfg:   cfg,
 		st:    st,
+		lh:    lh,
 		model: model,
 	}
 }

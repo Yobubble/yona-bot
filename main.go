@@ -27,13 +27,18 @@ func init() {
 	st := storage.SelectStorage(cfg)
 	tts := tts.SelectTTSModel(cfg)
 	stt := stt.NewOpenAI(cfg)
-	lm := lm.SelectLM(cfg, st)
+
+	ah := helper.AudioHelper{}
+	lh := helper.LangHelper{}
+
+	lm := lm.SelectLM(cfg, st, &lh)
 
 	deps := &discordcmd.DepsHolder{
 		ST:  st,
 		LM:  lm,
 		TTS: tts,
 		STT: stt,
+		AH:  &ah,
 	}
 
 	s, err = discordgo.New("Bot " + cfg.GetDiscordBotToken())
