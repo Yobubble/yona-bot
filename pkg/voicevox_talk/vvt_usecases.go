@@ -69,7 +69,7 @@ func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, er
 		case <-time.After(2 * time.Second):
 			log.Sugar.Info("Silence detected...")
 
-			log.Sugar.Debugf("There %d user(s) in the voice channel", len(files))
+			log.Sugar.Debugf("There is/are %d user(s) in the voice channel", len(files))
 			if len(files) == 0 {
 				return nil, errors.New("no user in the voice channel")
 			}
