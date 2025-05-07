@@ -17,7 +17,7 @@ COPY . .
 RUN go build -v -o /yona main.go
 
 # Final Stage
-FROM alpine:latest
+FROM alpine:3.21
 
 WORKDIR /app
 
