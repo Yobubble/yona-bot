@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// TODO: handle errors and validate inputs
 type s3Configs struct {
 	S3Bucket           string
 	AWSAccessKeyId     string
