@@ -73,6 +73,7 @@ func main() {
 	}
 
 	defer s.Close()
+	defer log.Sugar.Sync()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)

@@ -2,12 +2,10 @@ package helper
 
 import (
 	"encoding/binary"
-	"fmt"
 	"io"
 	"os"
 	"time"
 
-	"github.com/Yobubble/yona-bot/internal/log"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -19,26 +17,22 @@ type DiscordHelper struct {
 func (d *DiscordHelper) RemoveGlobalCommands() error {
 	cmds, err := d.S.ApplicationCommands(d.S.State.User.ID, "")
 	if err != nil {
-		log.Sugar.Error("Could not fetch registered commands")
 		return err
 	}
 
 	for _, v := range cmds {
 		err := d.S.ApplicationCommandDelete(d.S.State.User.ID, "", v.ID)
 		if err != nil {
-			log.Sugar.Errorf("Cannot delete '%v' command: %v", v.Name, err)
 			return err
 		}
 	}
 
-	log.Sugar.Debug("Successfully removed global commands...")
 	return nil
 }
 
 func (d *DiscordHelper) GetGuildName() (string, error) {
 	guild, err := d.S.Guild(d.I.GuildID)
 	if err != nil {
-		log.Sugar.Errorf("Failed to get guild name: %v", err)
 		return "", err
 	}
 
@@ -56,7 +50,6 @@ func (d *DiscordHelper) GetVoiceConnection() *discordgo.VoiceConnection {
 func (d *DiscordHelper) GetUserVoiceChannel() (string, error) {
 	vs, err := d.S.State.VoiceState(d.I.GuildID, d.I.Member.User.ID)
 	if err != nil {
-		log.Sugar.Errorf("Failed to get voice state: %v", err)
 		return "", err
 	}
 
@@ -89,7 +82,6 @@ func (d *DiscordHelper) loadSound(filePath string) ([][]byte, error) {
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println("Error opening dca file :", err)
 		return nil, err
 	}
 
@@ -109,7 +101,6 @@ func (d *DiscordHelper) loadSound(filePath string) ([][]byte, error) {
 		}
 
 		if err != nil {
-			fmt.Println("Error reading from dca file :", err)
 			return nil, err
 		}
 
@@ -119,7 +110,6 @@ func (d *DiscordHelper) loadSound(filePath string) ([][]byte, error) {
 
 		// Should not be any end of file errors
 		if err != nil {
-			fmt.Println("Error reading from dca file :", err)
 			return nil, err
 		}
 

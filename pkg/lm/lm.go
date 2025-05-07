@@ -17,9 +17,9 @@ type LM interface {
 func SelectLM(cfg *config.Cfg, st storage.Storage) LM {
 	switch cfg.GetLM() {
 	case enum.GPT4o:
-		return newOpenAI(cfg, st)
+		return newOpenAI(cfg, st, enum.GPT4o)
 	default:
-		log.Sugar.Panic("Select LM Error")
+		log.Sugar.Panic("Select LM Invalid")
 		return nil
 	}
 

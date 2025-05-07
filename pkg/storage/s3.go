@@ -3,10 +3,10 @@ package storage
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/Yobubble/yona-bot/config"
-	"github.com/Yobubble/yona-bot/internal/log"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -31,8 +31,7 @@ func (s *s3Storage) Read(filePath string) ([]byte, error) {
 	})
 
 	if err != nil {
-		log.Sugar.Errorf("Failed to download file '%s' from bucket '%s': %v", filePath, s.s3Cfg.S3Bucket, err)
-		return nil, err
+		return nil, fmt.Errorf("storage: failed to download file '%s' from bucket '%s': %w", filePath, s.s3Cfg.S3Bucket, err)
 	}
 
 	return buf.Bytes(), nil
@@ -48,17 +47,14 @@ func (s *s3Storage) Write(data []byte, filePath string) error {
 		Body:   bytes.NewBuffer(data),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("storage: failed to upload file '%s' to bucket '%s': %w", filePath, s.s3Cfg.S3Bucket, err)
 	}
 
 	return nil
 }
 
 func newS3(s3Cfg *config.S3Config) Storage {
-	cfg, err := awsConfig.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		log.Sugar.Panicf("Failed to load shared AWS configurations: %v", err)
-	}
+	cfg, _ := awsConfig.LoadDefaultConfig(context.TODO())
 
 	cli := s3.NewFromConfig(cfg)
 

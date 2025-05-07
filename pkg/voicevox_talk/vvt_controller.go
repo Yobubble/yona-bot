@@ -7,6 +7,7 @@ import (
 	"github.com/Yobubble/yona-bot/internal/helper"
 	"github.com/Yobubble/yona-bot/internal/log"
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 type vvtController struct {
@@ -26,8 +27,8 @@ func (v *vvtController) AudioTest() {
 			Content: "Playing Lilac by Mrs. GREEN APPLE 🎵",
 		}})
 
-	if err := v.dh.PlayAudio(v.dh.GetVoiceConnection(), "./assets/audios/Mrs._GREEN_APPLE_Lilac.dca"); err != nil {
-		log.Sugar.Errorf("Error playing audio: %v", err)
+	if err := v.dh.PlayAudio(v.dh.GetVoiceConnection(), "./asset/audios/Mrs._GREEN_APPLE_Lilac.dca"); err != nil {
+		log.Sugar.Error("Error playing audio: ", zap.Error(err))
 		return
 	}
 }
@@ -36,24 +37,24 @@ func (v *vvtController) AudioTest() {
 func (v *vvtController) JoinVoiceChannel() {
 	guildName, err := v.dh.GetGuildName()
 	if err != nil {
-		log.Sugar.Errorf("Cannot get guild's name: %v", err)
+		log.Sugar.Error("Cannot get discord server's name: ", zap.Error(err))
 		return
 	}
 
 	if err := v.vvtu.lm.NewChatHistory(guildName); err != nil {
-		log.Sugar.Errorf("Cannot create chat history: %v", err)
+		log.Sugar.Error("Cannot create new chat history: ", zap.Error(err))
 		return
 	}
 
 	channelId, err := v.dh.GetUserVoiceChannel()
 	if err != nil {
-		log.Sugar.Errorf("Cannot get user's current channel id: %v", err)
+		log.Sugar.Error("Cannot get user's current voice channel: ", zap.Error(err))
 		return
 	}
 
 	_, err = v.dh.S.ChannelVoiceJoin(v.dh.I.GuildID, channelId, false, false)
 	if err != nil {
-		log.Sugar.Errorf("Cannot join voice channel: %v", err)
+		log.Sugar.Error("Cannot join voice channel: ", zap.Error(err))
 		return
 	}
 
@@ -69,7 +70,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 	vc := v.dh.GetVoiceConnection()
 	guildName, err := v.dh.GetGuildName()
 	if err != nil {
-		log.Sugar.Errorf("Cannot get guild's name: %v", err)
+		log.Sugar.Error("Cannot get guild's name: ", zap.Error(err))
 		return
 	}
 
@@ -79,7 +80,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 	}
 
 	if err := v.vvtu.pre(); err != nil {
-		log.Sugar.Errorf("Preparing Bot Failed: %v", err)
+		log.Sugar.Error("Preparing Bot Failed: ", zap.Error(err))
 		return
 	}
 
@@ -92,7 +93,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 
 	ssrcs, err := v.vvtu.voiceRecording(vc)
 	if err != nil {
-		log.Sugar.Errorf("Error recording voice: %v", err)
+		log.Sugar.Error("Error recording voice: ", zap.Error(err))
 		return
 	}
 
@@ -100,11 +101,12 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 		ssrcStr := strconv.Itoa(int(ssrc))
 
 		if err := v.vvtu.processRecordAudio(ssrcStr, guildName); err != nil {
-			log.Sugar.Errorf("Processing Recording Audios Error: %v", err)
+			log.Sugar.Error("Processing Recording Audios Error: ", zap.Error(err))
+			return
 		}
 
 		if err := v.dh.PlayAudio(vc, enum.Audio.GetFullPath(ssrcStr)); err != nil {
-			log.Sugar.Errorf("Error playing audio: %v", err)
+			log.Sugar.Error("Error playing audio: ", zap.Error(err))
 			return
 		}
 	}
@@ -122,12 +124,12 @@ func (v *vvtController) DisconnectFromTheVoiceChannel() {
 	}
 
 	if err := v.vvtu.post(); err != nil {
-		log.Sugar.Errorf("Cleaning Failed: %v", err)
+		log.Sugar.Error("Cleaning Failed: ", zap.Error(err))
 		return
 	}
 
 	if err := v.dh.GetVoiceConnection().Disconnect(); err != nil {
-		log.Sugar.Errorf("failed to disconnect from voice channel: %v", err)
+		log.Sugar.Error("failed to disconnect from voice channel: ", zap.Error(err))
 		return
 	}
 

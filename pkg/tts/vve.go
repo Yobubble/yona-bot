@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/Yobubble/yona-bot/config"
-	"github.com/Yobubble/yona-bot/internal/log"
 )
 
 type vve struct {
@@ -20,15 +19,13 @@ func (v *vve) audioQuery(text string, speakerId int) ([]byte, error) {
 	url := fmt.Sprintf(v.baseUrl+"/audio_query?text=%s&speaker=%d", url.QueryEscape(text), speakerId)
 	res, err := http.Post(url, "application/json", nil)
 	if err != nil {
-		log.Sugar.Warn("Error get audio query")
-		return nil, err
+		return nil, fmt.Errorf("text to speech: failed to get audio query: %w", err)
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Sugar.Warn("Error reading audio query response body")
-		return nil, err
+		return nil, fmt.Errorf("text to speech: failed to read audio query response: %w", err)
 	}
 
 	return body, nil
@@ -43,22 +40,19 @@ func (v *vve) TextToSpeech(text string, outputPath string) error {
 	url := fmt.Sprintf(v.baseUrl+"/synthesis?speaker=%d&enable_interrogative_upspeak=%t", 8, true)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(query))
 	if err != nil {
-		log.Sugar.Warn("Error sending audio synthesis request")
-		return err
+		return fmt.Errorf("text to speech: failed to synthesize audio: %w", err)
 	}
 	defer res.Body.Close()
 
 	out, err := os.Create(outputPath)
 	if err != nil {
-		log.Sugar.Warn("Error creating output file")
-		return err
+		return fmt.Errorf("text to speech: failed to create output file: %w", err)
 	}
 	defer out.Close()
 
 	_, err = io.Copy(out, res.Body)
 	if err != nil {
-		log.Sugar.Warn("Error writing audio data to file")
-		return err
+		return fmt.Errorf("text to speech: failed to write audio data to file: %w", err)
 	}
 
 	return nil

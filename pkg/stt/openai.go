@@ -2,11 +2,11 @@ package stt
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/Yobubble/yona-bot/config"
 	"github.com/Yobubble/yona-bot/internal/enum"
-	"github.com/Yobubble/yona-bot/internal/log"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 	"github.com/openai/openai-go/packages/param"
@@ -20,8 +20,7 @@ type openAI struct {
 func (w *openAI) AudioToText(filePath string, lang enum.Lang) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		log.Sugar.Error("Error opening file:", err)
-		return "", err
+		return "", fmt.Errorf("speech to text: failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -33,8 +32,7 @@ func (w *openAI) AudioToText(filePath string, lang enum.Lang) (string, error) {
 		},
 	})
 	if err != nil {
-		log.Sugar.Error("Error transcribing audio:", err)
-		return "", err
+		return "", fmt.Errorf("speech to text: failed to transcribe audio: %w", err)
 	}
 
 	return transcription.Text, nil

@@ -15,5 +15,4 @@ func InitLogger() {
 		zap.AddStacktrace(zapcore.ErrorLevel),
 	)
 	Sugar = logger.Sugar()
-	defer logger.Sync()
 }

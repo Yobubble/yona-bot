@@ -53,8 +53,7 @@ func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, er
 
 				file, err = oggwriter.New(filePath, 48000, 2)
 				if err != nil {
-					log.Sugar.Errorf("Error creating audio file: %v", err)
-					return nil, err
+					return nil, fmt.Errorf("voicevox talk usecase: error creating audio file: %w", err)
 				}
 				files[p.SSRC] = file
 			}
@@ -63,8 +62,7 @@ func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, er
 			rtp := v.createPionRTPPacket(p)
 			err := file.WriteRTP(rtp)
 			if err != nil {
-				log.Sugar.Error("Error writing to audio file")
-				return nil, err
+				return nil, fmt.Errorf("voicevox talk usecase: error writing to audio file: %w", err)
 			}
 
 		case <-time.After(2 * time.Second):
@@ -86,40 +84,34 @@ func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, er
 }
 
 func (v *vvtUseCase) pre() error {
-	if err := os.MkdirAll(enum.SSRC_OGG.GetPath(), os.ModePerm); err != nil {
-		return err
+	paths := []string{
+		enum.SSRC_OGG.GetPath(),
+		enum.SSRC_MP3.GetPath(),
+		enum.VVE.GetPath(),
+		enum.Audio.GetPath(),
 	}
 
-	if err := os.MkdirAll(enum.SSRC_MP3.GetPath(), os.ModePerm); err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll(enum.VVE.GetPath(), os.ModePerm); err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll(enum.Audio.GetPath(), os.ModePerm); err != nil {
-		return err
+	for _, val := range paths {
+		if err := os.MkdirAll(val, os.ModePerm); err != nil {
+			return fmt.Errorf("voicevox talk usecase: error make %s directory: %w", val, err)
+		}
 	}
 
 	return nil
 }
 
 func (v *vvtUseCase) post() error {
-	if err := os.RemoveAll(enum.SSRC_OGG.GetPath()); err != nil {
-		return err
+	paths := []string{
+		enum.SSRC_OGG.GetPath(),
+		enum.SSRC_MP3.GetPath(),
+		enum.VVE.GetPath(),
+		enum.Audio.GetPath(),
 	}
 
-	if err := os.RemoveAll(enum.SSRC_MP3.GetPath()); err != nil {
-		return err
-	}
-
-	if err := os.RemoveAll(enum.VVE.GetPath()); err != nil {
-		return err
-	}
-
-	if err := os.RemoveAll(enum.Audio.GetPath()); err != nil {
-		return err
+	for _, val := range paths {
+		if err := os.RemoveAll(val); err != nil {
+			return fmt.Errorf("voicevox talk usecase: error remove %s directory: %w", val, err)
+		}
 	}
 
 	return nil
@@ -130,44 +122,38 @@ func (v *vvtUseCase) processRecordAudio(ssrcStr string, guildName string) error 
 
 	// ogg -> mp3
 	if err := v.ah.ConvertToMp3(enum.SSRC_OGG.GetFullPath(ssrcStr), enum.SSRC_MP3.GetFullPath(ssrcStr)); err != nil {
-		log.Sugar.Errorf("Error converting from ogg to mp3: %v", err)
-		return err
+		return fmt.Errorf("voicevox talk usecase: error converting ogg to mp3: %w", err)
 	}
 
 	// STT
 	log.Sugar.Debug("Speech To Text...")
 	question, err := v.stt.AudioToText(enum.SSRC_MP3.GetFullPath(ssrcStr), enum.JP)
 	if err != nil {
-		log.Sugar.Errorf("Error converting audio to text:%v", err)
-		return err
+		return fmt.Errorf("voicevox talk usecase: error converting audio to text: %w", err)
 	}
 
 	// LM
 	log.Sugar.Debug("LM Answering...")
 	answer, err := v.lm.AskQuestion(guildName, question)
 	if err != nil {
-		log.Sugar.Errorf("Error generating answer: %v", err)
-		return err
+		return fmt.Errorf("voicevox talk usecase: error generating answer: %w", err)
 	}
 
 	if err := v.lm.UpdateChatHistory(guildName, question, answer); err != nil {
-		log.Sugar.Errorf("Error updating chat history: %v", err)
-		return err
+		return fmt.Errorf("voicevox talk usecase: error updating chat history: %w", err)
 	}
 
 	// TTS
 	log.Sugar.Debug("Text To Speech...")
 	err = v.tts.TextToSpeech(answer, enum.VVE.GetFullPath(ssrcStr))
 	if err != nil {
-		log.Sugar.Errorf("Error converting from text to audio: %v", err)
-		return err
+		return fmt.Errorf("voicevox talk usecase: error converting text to audio: %w", err)
 	}
 
 	// mp3 -> dca
 	err = v.ah.ConvertToDCA(enum.VVE.GetFullPath(ssrcStr), enum.Audio.GetFullPath(ssrcStr))
 	if err != nil {
-		log.Sugar.Errorf("Error converting from mp3 to dca: %v", err)
-		return err
+		return fmt.Errorf("voicevox talk usecase: error converting mp3 to dca: %w", err)
 	}
 
 	end := time.Now()

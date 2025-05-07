@@ -2,11 +2,11 @@ package lm
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/Yobubble/yona-bot/config"
 	"github.com/Yobubble/yona-bot/internal/enum"
-	"github.com/Yobubble/yona-bot/internal/log"
 	"github.com/Yobubble/yona-bot/pkg/storage"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -16,11 +16,12 @@ type openAI struct {
 	cfg                 *config.Cfg
 	conversationHistory []openai.ChatCompletionMessageParamUnion
 	st                  storage.Storage
+	model               enum.LM
 }
 
 func (g *openAI) NewChatHistory(guildName string) error {
 	if err := g.st.Write([]byte(""), enum.ChatHistory.GetFullPath(guildName)); err != nil {
-		return err
+		return fmt.Errorf("language model: error wrtting chat history: %w", err)
 	}
 
 	return nil
@@ -31,14 +32,14 @@ func (g *openAI) UpdateChatHistory(guildName string, question string, answer str
 
 	fileBytes, err := g.st.Read(guildPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("language model: error reading chat history: %w", err)
 	}
 
 	updatedChatHistory := string(fileBytes) + question + "\n" + answer + "\n"
 
 	err = g.st.Write([]byte(updatedChatHistory), guildPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("language model: error writing chat history: %w", err)
 	}
 
 	return nil
@@ -49,20 +50,18 @@ func (g *openAI) AskQuestion(guildName string, question string) (string, error) 
 
 	err := g.LoadChatHistory(guildName)
 	if err != nil {
-		log.Sugar.Error("Error load chat history")
-		return "", err
+		return "", fmt.Errorf("language model: error loading chat history: %w", err)
 	}
 
 	param := openai.ChatCompletionNewParams{
 		Messages: append(g.conversationHistory, openai.UserMessage(question)),
 		Seed:     openai.Int(1),
-		Model:    openai.ChatModelGPT4o,
+		Model:    g.model.GetOpenAIModel(),
 	}
 
 	completion, err := cli.Chat.Completions.New(context.Background(), param)
 	if err != nil {
-		log.Sugar.Error("Error generating answer")
-		return "", err
+		return "", fmt.Errorf("language model: error getting chat completion: %w", err)
 	}
 
 	return completion.Choices[0].Message.Content, nil
@@ -71,7 +70,7 @@ func (g *openAI) AskQuestion(guildName string, question string) (string, error) 
 func (g *openAI) LoadChatHistory(guildName string) error {
 	fileBytes, err := g.st.Read(enum.ChatHistory.GetFullPath(guildName))
 	if err != nil {
-		return err
+		return fmt.Errorf("language model: error reading chat history: %w", err)
 	}
 
 	ch := strings.Split(strings.TrimSpace(string(fileBytes)), "\n")
@@ -90,9 +89,10 @@ func (g *openAI) LoadChatHistory(guildName string) error {
 	return nil
 }
 
-func newOpenAI(cfg *config.Cfg, st storage.Storage) LM {
+func newOpenAI(cfg *config.Cfg, st storage.Storage, model enum.LM) LM {
 	return &openAI{
-		cfg: cfg,
-		st:  st,
+		cfg:   cfg,
+		st:    st,
+		model: model,
 	}
 }
