@@ -2,7 +2,7 @@
 
 ---
 
-A self-hosted discord bot for real-time conversation, utilizing various external libraries which categorized into
+A self-hosted discord bot for turn-based conversation, utilizing various external libraries which categorized into
 
 - **Language Model**
   - OpenAI GPT4o
@@ -15,12 +15,7 @@ A self-hosted discord bot for real-time conversation, utilizing various external
 
 ### Features
 
-- Real-time conversation on discord voice channel.
-- Conversation histories available for each discord server.
-- Handle multiple questions at once.
-- AWS S3 integration for cloud storage.
-- .env configuration script.
-- Leverage docker compose for simple deployment process.
+- Turn-based conversation with AI on discord voice channel.
 
 > 📔 NOTES
 >
