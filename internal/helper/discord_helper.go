@@ -14,22 +14,6 @@ type DiscordHelper struct {
 	I *discordgo.InteractionCreate
 }
 
-func (d *DiscordHelper) RemoveGlobalCommands() error {
-	cmds, err := d.S.ApplicationCommands(d.S.State.User.ID, "")
-	if err != nil {
-		return err
-	}
-
-	for _, v := range cmds {
-		err := d.S.ApplicationCommandDelete(d.S.State.User.ID, "", v.ID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (d *DiscordHelper) GetGuildName() (string, error) {
 	guild, err := d.S.Guild(d.I.GuildID)
 	if err != nil {

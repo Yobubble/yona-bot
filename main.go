@@ -65,9 +65,24 @@ func main() {
 		log.Sugar.Fatalf("Cannot open the session: %v", err)
 	}
 
-	log.Sugar.Info("Adding commands...")
+	// Remove old global commands
+	log.Sugar.Info("Removing old commands...")
+
+	cmds, err := s.ApplicationCommands(s.State.User.ID, "")
+	if err != nil {
+		log.Sugar.Fatalf("Cannot get commands: %v", err)
+	}
+
+	for _, v := range cmds {
+		err := s.ApplicationCommandDelete(s.State.User.ID, "", v.ID)
+		if err != nil {
+			log.Sugar.Fatalf("Cannot delete '%v' command: %v", v.Name, err)
+		}
+	}
 
 	// Create Global Commands
+	log.Sugar.Info("Adding commands...")
+
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(discordcmd.Commands))
 	for i, v := range discordcmd.Commands {
 		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
