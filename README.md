@@ -1,7 +1,5 @@
 # yona-bot <img src="/assets/images/bot_icon.jpg" width="50">
 
----
-
 A self-hosted discord bot for real-time conversation, utilizing various external libraries which categorized into
 
 - **Language Model**
@@ -22,7 +20,7 @@ A self-hosted discord bot for real-time conversation, utilizing various external
 - .env configuration script.
 - Leverage docker compose for simple deployment process.
 
-> 📔 NOTES
+> 📔 **NOTES**
 >
 > - Currently only support Japanese and GPT4o for language model.
 > - you can just terminate the bot directly in the terminal to reveal the recorded files or use `/disconnect` to remove the recorded files
