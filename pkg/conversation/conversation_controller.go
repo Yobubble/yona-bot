@@ -1,4 +1,4 @@
-package vvt
+package cvs
 
 import (
 	"strconv"
@@ -10,12 +10,12 @@ import (
 	"go.uber.org/zap"
 )
 
-type vvtController struct {
-	vvtu *vvtUseCase
+type cvsController struct {
+	cvsu *cvsUseCase
 	dh   *helper.DiscordHelper
 }
 
-func (v *vvtController) AudioTest() {
+func (v *cvsController) AudioTest() {
 	if !v.dh.IsBotInVoiceChannel() {
 		log.Sugar.Error("Bot is not in the voice channel")
 		return
@@ -34,14 +34,14 @@ func (v *vvtController) AudioTest() {
 }
 
 // Ref: https://github.com/bwmarrin/discordgo/blob/master/examples/voice_receive/main.go
-func (v *vvtController) JoinVoiceChannel() {
+func (v *cvsController) JoinVoiceChannel() {
 	guildName, err := v.dh.GetGuildName()
 	if err != nil {
 		log.Sugar.Error("Cannot get discord server's name: ", zap.Error(err))
 		return
 	}
 
-	if err := v.vvtu.lm.NewChatHistory(guildName); err != nil {
+	if err := v.cvsu.lm.NewChatHistory(guildName); err != nil {
 		log.Sugar.Error("Cannot create new chat history: ", zap.Error(err))
 		return
 	}
@@ -66,7 +66,7 @@ func (v *vvtController) JoinVoiceChannel() {
 	})
 }
 
-func (v *vvtController) ListenToTheVoiceChannel() {
+func (v *cvsController) ListenToTheVoiceChannel() {
 	vc := v.dh.GetVoiceConnection()
 	guildName, err := v.dh.GetGuildName()
 	if err != nil {
@@ -79,7 +79,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 		return
 	}
 
-	if err := v.vvtu.pre(); err != nil {
+	if err := v.cvsu.pre(); err != nil {
 		log.Sugar.Error("Preparing Bot Failed: ", zap.Error(err))
 		return
 	}
@@ -91,7 +91,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 		},
 	})
 
-	ssrcs, err := v.vvtu.voiceRecording(vc)
+	ssrcs, err := v.cvsu.voiceRecording(vc)
 	if err != nil {
 		log.Sugar.Error("Error recording voice: ", zap.Error(err))
 		return
@@ -100,7 +100,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 	for _, ssrc := range ssrcs {
 		ssrcStr := strconv.Itoa(int(ssrc))
 
-		if err := v.vvtu.processRecordAudio(ssrcStr, guildName); err != nil {
+		if err := v.cvsu.processRecordAudio(ssrcStr, guildName); err != nil {
 			log.Sugar.Error("Processing Recording Audios Error: ", zap.Error(err))
 			return
 		}
@@ -112,7 +112,7 @@ func (v *vvtController) ListenToTheVoiceChannel() {
 	}
 }
 
-func (v *vvtController) DisconnectFromTheVoiceChannel() {
+func (v *cvsController) DisconnectFromTheVoiceChannel() {
 	if !v.dh.IsBotInVoiceChannel() {
 		v.dh.S.InteractionRespond(v.dh.I.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -123,7 +123,7 @@ func (v *vvtController) DisconnectFromTheVoiceChannel() {
 		return
 	}
 
-	if err := v.vvtu.post(); err != nil {
+	if err := v.cvsu.post(); err != nil {
 		log.Sugar.Error("Cleaning Failed: ", zap.Error(err))
 		return
 	}
@@ -141,9 +141,9 @@ func (v *vvtController) DisconnectFromTheVoiceChannel() {
 	})
 }
 
-func NewVVTController(vvtu *vvtUseCase, dh *helper.DiscordHelper) *vvtController {
-	return &vvtController{
-		vvtu: vvtu,
+func NewCVSController(cvsu *cvsUseCase, dh *helper.DiscordHelper) *cvsController {
+	return &cvsController{
+		cvsu: cvsu,
 		dh:   dh,
 	}
 }

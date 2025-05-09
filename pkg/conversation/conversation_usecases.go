@@ -1,4 +1,4 @@
-package vvt
+package cvs
 
 import (
 	"errors"
@@ -19,7 +19,7 @@ import (
 	"github.com/pion/webrtc/v4/pkg/media/oggwriter"
 )
 
-type vvtUseCase struct {
+type cvsUseCase struct {
 	st  storage.Storage
 	ah  *helper.AudioHelper
 	lm  lm.LM
@@ -28,7 +28,7 @@ type vvtUseCase struct {
 }
 
 // Ref: https://github.com/bwmarrin/discordgo/blob/master/examples/voice_receive/main.go
-func (v *vvtUseCase) createPionRTPPacket(p *discordgo.Packet) *rtp.Packet {
+func (v *cvsUseCase) createPionRTPPacket(p *discordgo.Packet) *rtp.Packet {
 	return &rtp.Packet{
 		Header: rtp.Header{
 			Version:        2,
@@ -41,7 +41,7 @@ func (v *vvtUseCase) createPionRTPPacket(p *discordgo.Packet) *rtp.Packet {
 	}
 }
 
-func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, error) {
+func (v *cvsUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, error) {
 	files := make(map[uint32]media.Writer)
 	for {
 		select {
@@ -87,7 +87,7 @@ func (v *vvtUseCase) voiceRecording(vc *discordgo.VoiceConnection) ([]uint32, er
 	}
 }
 
-func (v *vvtUseCase) pre() error {
+func (v *cvsUseCase) pre() error {
 	paths := []string{
 		enum.SSRC_OGG.GetPath(),
 		enum.SSRC_MP3.GetPath(),
@@ -104,7 +104,7 @@ func (v *vvtUseCase) pre() error {
 	return nil
 }
 
-func (v *vvtUseCase) post() error {
+func (v *cvsUseCase) post() error {
 	paths := []string{
 		enum.SSRC_OGG.GetPath(),
 		enum.SSRC_MP3.GetPath(),
@@ -121,7 +121,7 @@ func (v *vvtUseCase) post() error {
 	return nil
 }
 
-func (v *vvtUseCase) processRecordAudio(ssrcStr string, guildName string) error {
+func (v *cvsUseCase) processRecordAudio(ssrcStr string, guildName string) error {
 	start := time.Now()
 
 	// ogg -> mp3
@@ -166,8 +166,8 @@ func (v *vvtUseCase) processRecordAudio(ssrcStr string, guildName string) error 
 	return nil
 }
 
-func NewVVTUseCase(st storage.Storage, lm lm.LM, tts tts.TTSModel, stt stt.STTModel, ah *helper.AudioHelper) *vvtUseCase {
-	return &vvtUseCase{
+func NewCVSUseCase(st storage.Storage, lm lm.LM, tts tts.TTSModel, stt stt.STTModel, ah *helper.AudioHelper) *cvsUseCase {
+	return &cvsUseCase{
 		st:  st,
 		lm:  lm,
 		tts: tts,
