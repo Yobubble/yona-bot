@@ -8,8 +8,8 @@ var Commands = []*discordgo.ApplicationCommand{
 		Description: "Greeting message.",
 	},
 	{
-		Name:         "voicevox_talk",
-		Description:  "A talking bot powered by VOICEVOX Engine",
+		Name:         "conversation",
+		Description:  "Let's have a conversation!",
 		DMPermission: new(bool),
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -19,12 +19,12 @@ var Commands = []*discordgo.ApplicationCommand{
 			},
 			{
 				Name:        "listen",
-				Description: "Listen for the questions from users in the voice channel.",
+				Description: "Listen for the questions in the voice channel and stop when there is silence.",
 				Type:        discordgo.ApplicationCommandOptionSubCommand,
 			},
 			{
 				Name:        "disconnect",
-				Description: "Disconnect bot from the voice channel.",
+				Description: "Remove recorded files and Disconnect bot from the voice channel.",
 				Type:        discordgo.ApplicationCommandOptionSubCommand,
 			},
 			{
