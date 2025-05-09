@@ -17,11 +17,6 @@ A self-hosted discord bot for turn-based conversation, utilizing various externa
 
 - Turn-based conversation with AI on discord voice channel.
 
-> 📔 **NOTES**
->
-> - Currently only support Japanese and GPT4o for language model.
-> - you can just terminate the bot directly in the terminal to reveal the recorded files or use `/disconnect` to remove the recorded files
-
 ---
 
 ### Setup instruction
@@ -40,14 +35,22 @@ First and foremost, prepare your discord bot token from your discord bot
 1. clone the repository
 2. run `./scripts/setup_env` and complete the configuration process.
 3. run `docker compose up -d`
-4. Done!
+4. done!
 
 or
 
 1. clone the repository
 2. run `./scripts/setup_env` and complete the configuration process.e
 3. run `go run main.go` (make sure you have installed those libraries)
-4. Done!
+4. done!
+
+#### How to use it
+
+1. make sure your bot is online and already in the discord server
+2. use `/join` to join the voice channel
+3. use `/listen` to make the bot listen for questions at once
+4. wait for the answers!
+5. go back to #3
 
 ---
 
