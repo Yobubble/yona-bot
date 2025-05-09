@@ -56,7 +56,7 @@ or
 
 #### Issues encountered and possible solution I can think of
 
-- Conversation delay (might be able to solve by controlling length of answer and improving code quality)
+- Poor performance (might be able to solve by controlling length of answer and improving code quality)
 
 #### Contributions ? I don't know man
 
