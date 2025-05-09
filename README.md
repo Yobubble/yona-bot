@@ -1,7 +1,5 @@
 # yona-bot ![logo](./assets/images/logo.jpg)
 
----
-
 A self-hosted discord bot for turn-based conversation, utilizing various external libraries which categorized into
 
 - **Language Model**
@@ -16,8 +14,6 @@ A self-hosted discord bot for turn-based conversation, utilizing various externa
 ## Features
 
 - Turn-based conversation with AI on discord voice channel.
-
----
 
 ## Setup instruction
 
