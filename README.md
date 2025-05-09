@@ -33,14 +33,14 @@ A self-hosted discord bot for turn-based conversation, utilizing various externa
 First and foremost, prepare your discord bot token from your discord bot
 
 1. clone the repository
-2. run `./scripts/setup_env` and complete the configuration process.
-3. run `docker compose up -d`
+2. run `./scripts/1/setup_env` and complete the configuration process.
+3. run `docker compose up -d` or `docker compose up` to see the logs
 4. done!
 
 or
 
 1. clone the repository
-2. run `./scripts/setup_env` and complete the configuration process.e
+2. run `./scripts/1/setup_env` and complete the configuration process.e
 3. run `go run main.go` (make sure you have installed those libraries)
 4. done!
 

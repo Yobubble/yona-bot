@@ -16,7 +16,7 @@ var CommandHandlers = map[string]func(dh *helper.DiscordHelper, deps *DepsHolder
 			},
 		})
 	},
-	"voicevox_talk": func(dh *helper.DiscordHelper, deps *DepsHolder) {
+	"conversation": func(dh *helper.DiscordHelper, deps *DepsHolder) {
 		options := dh.I.ApplicationCommandData().Options
 
 		vvtu := cvs.NewCVSUseCase(deps.ST, deps.LM, deps.TTS, deps.STT, deps.AH)
@@ -27,10 +27,10 @@ var CommandHandlers = map[string]func(dh *helper.DiscordHelper, deps *DepsHolder
 			vvtc.JoinVoiceChannel()
 		case "listen":
 			vvtc.ListenToTheVoiceChannel()
-		case "audio_test":
-			vvtc.AudioTest()
 		case "disconnect":
 			vvtc.DisconnectFromTheVoiceChannel()
+		case "audio_test":
+			vvtc.AudioTest()
 		}
 	},
 }

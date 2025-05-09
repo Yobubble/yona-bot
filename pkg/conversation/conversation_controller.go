@@ -27,7 +27,7 @@ func (v *cvsController) AudioTest() {
 			Content: "Playing Lilac by Mrs. GREEN APPLE 🎵",
 		}})
 
-	if err := v.dh.PlayAudio(v.dh.GetVoiceConnection(), "./asset/audios/Mrs._GREEN_APPLE_Lilac.dca"); err != nil {
+	if err := v.dh.PlayAudio(v.dh.GetVoiceConnection(), "./assets/audios/Mrs._GREEN_APPLE_Lilac.dca"); err != nil {
 		log.Sugar.Error("Error playing audio: ", zap.Error(err))
 		return
 	}
